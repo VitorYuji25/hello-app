@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_REPO: YOUR_DOCKER_USER/hello-app
+  IMAGE_REPO: vitoryuji25/hello-app
 
 jobs:
   build-and-publish:
@@ -47,7 +47,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           IMAGE_REPO: ${{ env.IMAGE_REPO }}
         run: |
-          git clone git@github.com:your-org/hello-manifests.git manifests
+          git clone git@github.com:VitorYuji25/hello-manifests.git manifests
           cd manifests
           # substitui a imagem no deployment.yaml (ajuste regex conforme seu yaml)
           sed -i "s|image: .*|image: ${IMAGE_REPO}:${IMAGE_TAG}|g" deployment.yaml
