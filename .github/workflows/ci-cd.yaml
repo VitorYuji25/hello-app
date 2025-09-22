@@ -59,7 +59,7 @@ jobs:
           git push origin HEAD
 
       - name: Create PR in manifests repo (via GitHub API)
-        if: ${{ secrets.MANIFESTS_GITHUB_TOKEN != '' }}
+        if: ${{ secrets.MANIFESTS_GITHUB_TOKEN }}
         env:
           GITHUB_API_TOKEN: ${{ secrets.MANIFESTS_GITHUB_TOKEN }}
           BRANCH: update-image-${{ github.sha }}
