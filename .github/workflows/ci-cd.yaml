@@ -1,4 +1,4 @@
-name: CI/CD - Build, Push & Update Manifests
+name: CI/CD - Build, Push & Create Manifests PR
 
 on:
   push:
@@ -42,45 +42,51 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Clone manifests repo and update image
+      - name: Clone manifests repo and create update branch
         env:
           IMAGE_TAG: ${{ github.sha }}
-          IMAGE_REPO: ${{ env.IMAGE_REPO }}
         run: |
+          # Clona o repositório de manifestos
           git clone git@github.com:VitorYuji25/hello-manifests.git manifests
           cd manifests
-          sed -i "s|image: .*|image: ${IMAGE_REPO}:${IMAGE_TAG}|g" deployment.yaml
+
+          # Configura o Git
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-          git checkout -b update-image-${IMAGE_TAG}
-          git add deployment.yaml
-          git commit -m "ci: update image to ${IMAGE_TAG}"
-          git push origin HEAD
 
-      # <-- MUDANÇA PRINCIPAL AQUI -->
-      # O passo de criação de PR foi dividido em dois para evitar o erro de parsing.
-      # 1. Primeiro, verificamos se o token existe e definimos uma variável de ambiente.
-      # 2. Depois, usamos essa variável para executar o passo condicionalmente.
+          # Cria uma nova branch para a atualização da imagem
+          git checkout -b update-image-${IMAGE_TAG}
+
+          # <-- MUDANÇA AQUI: Aponta para o arquivo dentro da pasta k8s
+          # Atualiza o arquivo de deployment com a nova tag da imagem
+          sed -i "s|image: .*|image: ${{ env.IMAGE_REPO }}:${IMAGE_TAG}|g" k8s/deployment.yaml
+
+          # Adiciona a alteração e faz o commit e push para a nova branch
+          git add k8s/deployment.yaml
+          git commit -m "ci: update image to ${IMAGE_TAG}"
+          git push origin update-image-${IMAGE_TAG}
 
       - name: Check if PR token is available
         id: check_token
         run: echo "token_present=${{ secrets.MANIFESTS_GITHUB_TOKEN != '' }}" >> $GITHUB_OUTPUT
 
       - name: Create PR in manifests repo (via GitHub API)
-        # Agora a condição IF checa a saída do passo anterior, o que é mais confiável.
         if: steps.check_token.outputs.token_present == 'true'
         env:
           GITHUB_API_TOKEN: ${{ secrets.MANIFESTS_GITHUB_TOKEN }}
           BRANCH: update-image-${{ github.sha }}
         run: |
+          # Cria o corpo da requisição para abrir o Pull Request
           cat > payload.json <<EOF
           {
-            "title": "ci: update image ${{ github.sha }}",
+            "title": "ci: update image to ${{ github.sha }}",
             "head": "${BRANCH}",
             "base": "main",
             "body": "Automated image update from CI"
           }
           EOF
+
+          # Envia a requisição para a API do GitHub
           curl -s -X POST -H "Authorization: token $GITHUB_API_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/VitorYuji25/hello-manifests/pulls \
