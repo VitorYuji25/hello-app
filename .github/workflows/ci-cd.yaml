@@ -49,7 +49,6 @@ jobs:
         run: |
           git clone git@github.com:VitorYuji25/hello-manifests.git manifests
           cd manifests
-          # substitui a imagem no deployment.yaml (ajuste regex conforme seu yaml)
           sed -i "s|image: .*|image: ${IMAGE_REPO}:${IMAGE_TAG}|g" deployment.yaml
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
@@ -58,8 +57,18 @@ jobs:
           git commit -m "ci: update image to ${IMAGE_TAG}"
           git push origin HEAD
 
+      # <-- MUDANÇA PRINCIPAL AQUI -->
+      # O passo de criação de PR foi dividido em dois para evitar o erro de parsing.
+      # 1. Primeiro, verificamos se o token existe e definimos uma variável de ambiente.
+      # 2. Depois, usamos essa variável para executar o passo condicionalmente.
+
+      - name: Check if PR token is available
+        id: check_token
+        run: echo "token_present=${{ secrets.MANIFESTS_GITHUB_TOKEN != '' }}" >> $GITHUB_OUTPUT
+
       - name: Create PR in manifests repo (via GitHub API)
-        if: secrets.MANIFESTS_GITHUB_TOKEN != ''
+        # Agora a condição IF checa a saída do passo anterior, o que é mais confiável.
+        if: steps.check_token.outputs.token_present == 'true'
         env:
           GITHUB_API_TOKEN: ${{ secrets.MANIFESTS_GITHUB_TOKEN }}
           BRANCH: update-image-${{ github.sha }}
@@ -76,3 +85,4 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/VitorYuji25/hello-manifests/pulls \
             -d @payload.json
+
