@@ -68,7 +68,13 @@ jobs:
 
       - name: Check if PR token is available
         id: check_token
-        run: echo "token_present=${{ secrets.MANIFESTS_GITHUB_TOKEN != '' }}" >> $GITHUB_OUTPUT
+        run: |
+          if [ -n "${{ secrets.MANIFESTS_GITHUB_TOKEN }}" ]; then
+            echo "token_present=true" >> $GITHUB_OUTPUT
+          else
+            echo "token_present=false" >> $GITHUB_OUTPUT
+          fi
+
 
       - name: Create PR in manifests repo (via GitHub API)
         if: steps.check_token.outputs.token_present == 'true'
@@ -91,4 +97,3 @@ jobs:
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/VitorYuji25/hello-manifests/pulls \
             -d @payload.json
-
