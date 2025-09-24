@@ -46,22 +46,16 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # Clona o repositório de manifestos
           git clone git@github.com:VitorYuji25/hello-manifests.git manifests
           cd manifests
 
-          # Configura o Git
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
 
-          # Cria uma nova branch para a atualização da imagem
           git checkout -b update-image-${IMAGE_TAG}
 
-          # <-- MUDANÇA AQUI: Aponta para o arquivo dentro da pasta k8s
-          # Atualiza o arquivo de deployment com a nova tag da imagem
           sed -i "s|image: .*|image: ${{ env.IMAGE_REPO }}:${IMAGE_TAG}|g" k8s/deployment.yaml
 
-          # Adiciona a alteração e faz o commit e push para a nova branch
           git add k8s/deployment.yaml
           git commit -m "ci: update image to ${IMAGE_TAG}"
           git push origin update-image-${IMAGE_TAG}
@@ -75,14 +69,12 @@ jobs:
             echo "token_present=false" >> $GITHUB_OUTPUT
           fi
 
-
       - name: Create PR in manifests repo (via GitHub API)
         if: steps.check_token.outputs.token_present == 'true'
         env:
           GITHUB_API_TOKEN: ${{ secrets.MANIFESTS_GITHUB_TOKEN }}
           BRANCH: update-image-${{ github.sha }}
         run: |
-          # Cria o corpo da requisição para abrir o Pull Request
           cat > payload.json <<EOF
           {
             "title": "ci: update image to ${{ github.sha }}",
@@ -92,7 +84,6 @@ jobs:
           }
           EOF
 
-          # Envia a requisição para a API do GitHub
           curl -s -X POST -H "Authorization: token $GITHUB_API_TOKEN" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/VitorYuji25/hello-manifests/pulls \
