@@ -47,10 +47,10 @@ Automatizar todo o ciclo de vida de uma aplicação, desde o push de um novo có
 
 ## ⚙️ Arquitetura e Fluxo de Trabalho
 
-O projeto é dividido em dois repositórios principais para seguir as melhores práticas de GitOps:
+O projeto é dividido em dois repositórios principais:
 
 1. **hello-app**: Contém o código Python, Dockerfile e workflow do GitHub Actions.
-2. **hello-manifests**: Contém os manifestos Kubernetes (`deployment.yaml`, `service.yaml`) que descrevem o estado desejado da aplicação.
+2. **hello-manifests**: Contém os manifestos Kubernetes (`deployment.yaml`, `service.yaml`) que descrevem o estado desejado da aplicação. o arquivo `namespace.yaml` e o `kustomization.yaml` para ditar a ordem de execução dos arquivos.
 
 **Fluxo de trabalho automatizado:**
 
@@ -66,8 +66,8 @@ O projeto é dividido em dois repositórios principais para seguir as melhores p
 ## 📋 Passo a Passo da Implementação
 
 ### 1. Preparação dos Repositórios
-- **hello-app**: Contém `main.py`, `Dockerfile` e workflow em `.github/workflows/ci-cd.yaml`.
-- **hello-manifests**: Contém pasta `k8s/` com os manifestos `deployment.yaml` e `service.yaml`.
+- **hello-app**: Contém `main.py`, `Dockerfile`, `requiriments.txt`,`chaves publicas e pivadas` e workflow em `.github/workflows/ci-cd.yaml`.
+- **hello-manifests**: Contém pasta `k8s/` com os manifestos `deployment.yaml`, `service.yaml`, `namespace.yaml` e o `kustomization.yaml`.
 
 ### 2. Configuração da Autenticação
 - **Chave SSH**:
@@ -83,7 +83,7 @@ O arquivo `.github/workflows/ci-cd.yaml` foi configurado para:
 - Fazer login no Docker Hub usando os segredos.
 - Construir e enviar a imagem Docker para o Docker Hub (`latest` e SHA do commit).
 - Usar a chave SSH para clonar `hello-manifests`.
-- Criar branch, atualizar tag da imagem em `k8s/deployment.yaml` e fazer push.
+- Atualizar tag da imagem diretamente na main em `k8s/deployment.yaml` e fazer push.
 - (Opcional) Abrir Pull Request com alterações.
 
 ### 4. Configuração do Argo CD
@@ -94,9 +94,20 @@ O arquivo `.github/workflows/ci-cd.yaml` foi configurado para:
   - Destination Cluster: `https://kubernetes.default.svc`
   - Namespace: `hello-app`
   - Sync Policy: Automatic, com prune e self-heal.
+  - Aceeso pelo:
+    ```bash
+     kubectl -n argocd port-forward svc/argocd-server 8081:443
+    ```
 
 ### 5. Teste da Aplicação
 - Acessar aplicação via `kubectl port-forward`:
 
 ```bash
 kubectl port-forward svc/hello-service 8082:80 -n hello-app
+```
+
+### 6. Atualização da mensagem diretamente no arquivo main.py do repositório ou por um editor de texto
+- Após a alteração verificar o a seção Actions do Github;
+- Verificação da saúde e sincronização do ArgoCD;
+- Coneção do pod com a porta definida;
+- Atualização da mensagem corretamente.
