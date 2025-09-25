@@ -42,23 +42,22 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Clone manifests repo and create update branch
+      - name: Clone manifests repo and update deployment
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           git clone git@github.com:VitorYuji25/hello-manifests.git manifests
           cd manifests
-
+      
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-
-          git checkout -b update-image-${IMAGE_TAG}
-
+      
+          # Atualiza a imagem no deployment.yaml
           sed -i "s|image: .*|image: ${{ env.IMAGE_REPO }}:${IMAGE_TAG}|g" k8s/deployment.yaml
-
+      
           git add k8s/deployment.yaml
           git commit -m "ci: update image to ${IMAGE_TAG}"
-          git push origin update-image-${IMAGE_TAG}
+          git push origin main
 
       - name: Check if PR token is available
         id: check_token
