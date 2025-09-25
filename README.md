@@ -106,8 +106,31 @@ O arquivo `.github/workflows/ci-cd.yaml` foi configurado para:
 kubectl port-forward svc/hello-service 8082:80 -n hello-app
 ```
 
+
+
 ### 6. Atualização da mensagem diretamente no arquivo main.py do repositório ou por um editor de texto
 - Após a alteração verificar o a seção Actions do Github;
 - Verificação da saúde e sincronização do ArgoCD;
 - Coneção do pod com a porta definida;
 - Atualização da mensagem corretamente.
+
+
+## 🖼️ Evidências de Execução do Projeto
+
+### 1. Alteração no Código
+![Mensagem alterada no main.py](https://github.com/VitorYuji25/hello-app/raw/main/imagens/mensagem_main.py.png)
+
+### 2. Pipeline do GitHub Actions
+![Workflow do GitHub Actions com Sucesso](https://github.com/VitorYuji25/hello-app/raw/main/imagens/GitHub_Actions_Sucesso.png)
+
+### 3. Atualização da Imagem no DockerHub
+![Atualização no DockerHub](https://github.com/VitorYuji25/hello-app/raw/main/imagens/Atualizacao_DockerHub.png)
+
+### 4. Sincronização do ArgoCD
+![Sincronização do ArgoCD](https://github.com/VitorYuji25/hello-app/raw/main/imagens/ArgoCD_Sync.png)
+
+### 5. Pod Funcional no Kubernetes
+![Imagem do Pod funcional](https://github.com/VitorYuji25/hello-app/raw/main/imagens/Imagem_pod_funcional.png)
+
+### 6. Resultado Final
+![Saída da mensagem atualizada](https://github.com/VitorYuji25/hello-app/raw/main/imagens/Saida_mensagem_atualizada.png)
