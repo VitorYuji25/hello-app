@@ -52,7 +52,7 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
       
-          # Atualiza a imagem no deployment.yaml
+          
           sed -i "s|image: .*|image: ${{ env.IMAGE_REPO }}:${IMAGE_TAG}|g" k8s/deployment.yaml
       
           git add k8s/deployment.yaml
