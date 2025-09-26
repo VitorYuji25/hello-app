@@ -69,6 +69,17 @@ O projeto é dividido em dois repositórios principais:
 - **hello-app**: Contém `main.py`, `Dockerfile`, `requiriments.txt`,`chaves publicas e pivadas` e workflow em `.github/workflows/ci-cd.yaml`.
 - **hello-manifests**: Contém pasta `k8s/` com os manifestos `deployment.yaml`, `service.yaml`, `namespace.yaml` e o `kustomization.yaml`.
 
+### main.py
+```
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Meu novo novo novo novo novo novo novo novo:: Hello from Hello-App! V8"}
+```
+
 ### 2. Configuração da Autenticação
 - **Chave SSH**:
   - Gerar par de chaves: `ssh-keygen`.
